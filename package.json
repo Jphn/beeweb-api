@@ -1,0 +1,19 @@
+{
+  "name": "beeweb",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Jphn/cdits-beeweb.git"
+  },
+  "author": "João Pedro Holanda Neves",
+  "license": "GPL-3.0",
+  "bugs": {
+    "url": "https://github.com/Jphn/cdits-beeweb/issues"
+  },
+  "homepage": "https://github.com/Jphn/cdits-beeweb#readme"
+}
