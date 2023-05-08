@@ -1,51 +1,51 @@
 import { randomUUID } from 'crypto';
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { InMemoryUsersRepository } from '../../../tests/repositories/in-memory-users-repository';
 import { User } from '../../entities/user';
 import { UserSignUp } from './user-sign-up';
 
-describe('User sign up', function () {
-	it('should be able to sign up', async function () {
-		const usersRepository = new InMemoryUsersRepository();
-		const userSignUp = new UserSignUp(usersRepository);
+function makeSut() {
+	const usersRepository = new InMemoryUsersRepository();
+	const userSignUp = new UserSignUp(usersRepository);
 
-		const admin = new User({
-			firstName: 'Admin',
-			lastName: '',
-			email: 'admin@email.com',
-			password: 'password',
-			isAdmin: true,
-		});
-
-		await usersRepository.create(admin);
-
-		expect(
-			userSignUp.execute({
-				adminId: admin.id,
-				userProps: {
-					email: 'johndoe@email.com',
-					password: 'password',
-					firstName: 'John',
-					lastName: 'Doe',
-					isAdmin: false,
-				},
-			})
-		).resolves.toBeInstanceOf(User);
+	const adminOrError = User.create({
+		firstName: 'Admin',
+		lastName: '',
+		email: 'admin@email.com',
+		password: 'password',
+		isAdmin: true,
 	});
 
-	it('should not be able to sign up when sending invalid admin id', async function () {
-		const usersRepository = new InMemoryUsersRepository();
-		const userSignUp = new UserSignUp(usersRepository);
+	return { usersRepository, userSignUp, adminOrError };
+}
 
-		const admin = new User({
-			firstName: 'Admin',
-			lastName: '',
-			email: 'admin@email.com',
-			password: 'password',
-			isAdmin: true,
+describe('User sign up', function () {
+	it('should be able to sign up', async function () {
+		const { userSignUp, usersRepository, adminOrError } = makeSut();
+
+		if (adminOrError.isLeft()) return;
+
+		await usersRepository.create(adminOrError.value);
+
+		const response = await userSignUp.execute({
+			adminId: adminOrError.value.id,
+			userProps: {
+				email: 'johndoe@email.com',
+				password: 'password',
+				firstName: 'John',
+				lastName: 'Doe',
+				isAdmin: false,
+			},
 		});
 
-		const notAdmin = new User({
+		expect(response.isRight()).toBeTruthy();
+		expect(response.value).toBeInstanceOf(User);
+	});
+
+	describe('should not be able to sign up when sending invalid admin id', async function () {
+		const { userSignUp, usersRepository, adminOrError } = makeSut();
+
+		const rootOrError = User.create({
 			firstName: 'Not Admin',
 			lastName: '',
 			email: 'notadmin@email.com',
@@ -53,11 +53,13 @@ describe('User sign up', function () {
 			isAdmin: false,
 		});
 
-		await usersRepository.create(admin);
-		await usersRepository.create(notAdmin);
+		if (rootOrError.isLeft() || adminOrError.isLeft()) return;
 
-		expect(
-			userSignUp.execute({
+		await usersRepository.create(adminOrError.value);
+		await usersRepository.create(rootOrError.value);
+
+		test('random uuid', async function () {
+			const response = await userSignUp.execute({
 				adminId: randomUUID(),
 				userProps: {
 					email: 'johndoe@email.com',
@@ -66,12 +68,15 @@ describe('User sign up', function () {
 					lastName: 'Doe',
 					isAdmin: false,
 				},
-			})
-		).rejects.toBeInstanceOf(Error);
+			});
 
-		expect(
-			userSignUp.execute({
-				adminId: notAdmin.id,
+			expect(response.isLeft()).toBeTruthy();
+			expect(response.value).toBeInstanceOf(Error);
+		});
+
+		test('root user uuid', async function () {
+			const response = await userSignUp.execute({
+				adminId: rootOrError.value.id,
 				userProps: {
 					email: 'johndoe@email.com',
 					password: 'password',
@@ -79,35 +84,32 @@ describe('User sign up', function () {
 					lastName: 'Doe',
 					isAdmin: false,
 				},
-			})
-		).rejects.toBeInstanceOf(Error);
+			});
+
+			expect(response.isLeft()).toBeTruthy();
+			expect(response.value).toBeInstanceOf(Error);
+		});
 	});
 
-	it('should be able to sign up when using an existing email', async function () {
-		const usersRepository = new InMemoryUsersRepository();
-		const userSignUp = new UserSignUp(usersRepository);
+	it('should not be able to sign up when using an email already registered', async function () {
+		const { userSignUp, usersRepository, adminOrError } = makeSut();
 
-		const admin = new User({
-			firstName: 'Admin',
-			lastName: '',
-			email: 'admin@email.com',
-			password: 'password',
-			isAdmin: true,
+		if (adminOrError.isLeft()) return;
+
+		await usersRepository.create(adminOrError.value);
+
+		const response = await userSignUp.execute({
+			adminId: adminOrError.value.id,
+			userProps: {
+				email: adminOrError.value.email.value,
+				password: 'password',
+				firstName: 'John',
+				lastName: 'Doe',
+				isAdmin: false,
+			},
 		});
 
-		await usersRepository.create(admin);
-
-		expect(
-			userSignUp.execute({
-				adminId: admin.id,
-				userProps: {
-					email: admin.email,
-					password: 'password',
-					firstName: 'John',
-					lastName: 'Doe',
-					isAdmin: false,
-				},
-			})
-		).rejects.toBeInstanceOf(Error);
+		expect(response.isLeft()).toBeTruthy();
+		expect(response.value).toBeInstanceOf(Error);
 	});
 });
