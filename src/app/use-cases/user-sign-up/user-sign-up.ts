@@ -1,12 +1,13 @@
-import { User } from '../../entities/user';
+import { User, UserCreateProps } from '../../entities/user';
+import { Either, left, right } from '../../errors/either';
 import { UsersRepository } from '../../repositories/users-repository';
 
 type UserSignUpRequest = {
 	adminId: string;
-	userProps: Omit<User, 'id'>;
+	userProps: UserCreateProps;
 };
 
-type UserSignUpResponse = User;
+type UserSignUpResponse = Either<Error, User>;
 
 export class UserSignUp {
 	constructor(private usersRepository: UsersRepository) {}
@@ -15,14 +16,32 @@ export class UserSignUp {
 		adminId,
 		userProps,
 	}: UserSignUpRequest): Promise<UserSignUpResponse> {
-		const admin = await this.usersRepository.findUserById(adminId);
+		const adminOrError = await this.usersRepository.findUserById(adminId);
 
-		if (!admin || !admin.isAdmin) throw new Error('User not authorized!');
+		const { firstName, lastName, email, password, isAdmin } = userProps;
 
-		const user = new User(userProps);
+		if (
+			adminOrError.isLeft() ||
+			(adminOrError.isRight() && !adminOrError.value.isAdmin)
+		)
+			return left(new Error('Operation not authorized!'));
 
-		await this.usersRepository.create(user);
+		const userOrError = User.create({
+			firstName,
+			lastName,
+			email,
+			password,
+			isAdmin,
+		});
 
-		return user;
+		if (userOrError.isLeft()) return left(userOrError.value);
+
+		const newUserOrError = await this.usersRepository.create(
+			userOrError.value
+		);
+
+		if (newUserOrError.isLeft()) return left(newUserOrError.value);
+
+		return right(userOrError.value);
 	}
 }

@@ -1,4 +1,5 @@
 import { User } from '../../entities/user';
+import { Either, left, right } from '../../errors/either';
 import { UsersRepository } from '../../repositories/users-repository';
 
 interface UserSignInRequest {
@@ -6,7 +7,7 @@ interface UserSignInRequest {
 	password: string;
 }
 
-type UserSignInResponse = User;
+type UserSignInResponse = Either<Error, User>;
 
 export class UserSignIn {
 	constructor(private usersRepository: UsersRepository) {}
@@ -17,9 +18,12 @@ export class UserSignIn {
 	}: UserSignInRequest): Promise<UserSignInResponse> {
 		const user = await this.usersRepository.findUserByEmail(email);
 
-		if (!user || user.password != password)
-			throw new Error('Wrong email or password!');
+		if (
+			user.isLeft() ||
+			(user.isRight() && user.value.password != password)
+		)
+			return left(new Error('Invalid email or password!'));
 
-		return user;
+		return right(user.value);
 	}
 }

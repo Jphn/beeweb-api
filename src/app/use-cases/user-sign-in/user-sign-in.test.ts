@@ -3,70 +3,67 @@ import { InMemoryUsersRepository } from '../../../tests/repositories/in-memory-u
 import { User } from '../../entities/user';
 import { UserSignIn } from './user-sign-in';
 
+function makeSut() {
+	const usersRepository = new InMemoryUsersRepository();
+	const userSignIn = new UserSignIn(usersRepository);
+
+	const userOrError = User.create({
+		firstName: 'John',
+		lastName: 'Doe',
+		email: 'johndoe@email.com',
+		isAdmin: false,
+		password: 'hash',
+	});
+
+	return { usersRepository, userSignIn, userOrError };
+}
+
 describe('User sign in', function () {
 	it('should be able to sign in', async function () {
-		const usersRepository = new InMemoryUsersRepository();
-		const userSignIn = new UserSignIn(usersRepository);
+		const { usersRepository, userSignIn, userOrError } = makeSut();
 
-		const user = new User({
-			firstName: 'John',
-			lastName: 'Doe',
-			email: 'johndoe@email.com',
-			isAdmin: false,
-			password: 'hash',
+		if (userOrError.isLeft()) return;
+
+		await usersRepository.create(userOrError.value);
+
+		const response = await userSignIn.execute({
+			email: userOrError.value.email.value,
+			password: userOrError.value.password,
 		});
 
-		await usersRepository.create(user);
-
-		expect(
-			userSignIn.execute({
-				email: user.email,
-				password: user.password,
-			})
-		).resolves.toBeInstanceOf(User);
+		expect(response.isRight()).toBeTruthy();
+		expect(response.value).toBeInstanceOf(User);
 	});
 
 	it('should not be able to sign in when user is not registered', async function () {
-		const usersRepository = new InMemoryUsersRepository();
-		const userSignIn = new UserSignIn(usersRepository);
+		const { usersRepository, userSignIn, userOrError } = makeSut();
 
-		const user = new User({
-			firstName: 'John',
-			lastName: 'Doe',
-			email: 'johndoe@email.com',
-			isAdmin: false,
-			password: 'hash',
-		});
+		if (userOrError.isRight()) {
+			await usersRepository.create(userOrError.value);
 
-		await usersRepository.create(user);
-
-		expect(
-			userSignIn.execute({
+			const response = await userSignIn.execute({
 				email: 'doejohn@email.com',
 				password: 'password',
-			})
-		).rejects.toBeInstanceOf(Error);
+			});
+
+			expect(response.isLeft()).toBeTruthy();
+			expect(response.value).toBeInstanceOf(Error);
+		}
 	});
 
 	it('should not be able to sign in when user password is wrong', async function () {
-		const usersRepository = new InMemoryUsersRepository();
-		const userSignIn = new UserSignIn(usersRepository);
+		const { usersRepository, userSignIn, userOrError } = makeSut();
 
-		const user = new User({
-			firstName: 'John',
-			lastName: 'Doe',
-			email: 'johndoe@email.com',
-			isAdmin: false,
-			password: 'hash',
-		});
+		if (userOrError.isRight()) {
+			await usersRepository.create(userOrError.value);
 
-		await usersRepository.create(user);
-
-		expect(
-			userSignIn.execute({
-				email: user.email,
+			const response = await userSignIn.execute({
+				email: userOrError.value.email.value,
 				password: 'wrongPassword',
-			})
-		).rejects.toBeInstanceOf(Error);
+			});
+
+			expect(response.isLeft()).toBeTruthy();
+			expect(response.value).toBeInstanceOf(Error);
+		}
 	});
 });
