@@ -1,6 +1,6 @@
-import { randomUUID } from 'crypto';
 import { Either, left, right } from '../errors/either';
 import { Email } from '../value-objects/email';
+import { Entity } from './entity';
 
 export interface UserProps {
 	firstName: string;
@@ -12,22 +12,13 @@ export interface UserProps {
 export type UserCreateProps = Omit<UserProps, 'email'> & {
 	email: string;
 };
-export class User {
-	private _id: string;
-	private props: UserProps;
-
-	private constructor(props: UserProps, _id: string) {
-		this._id = _id;
-
-		this.props = props;
-
-		Object.freeze(this);
+export class User extends Entity<UserProps> {
+	private constructor(props: UserProps, _id?: string) {
+		super(props, _id);
 	}
 
 	static create(props: UserCreateProps, _id?: string): Either<Error, User> {
 		const { firstName, lastName, email, password, isAdmin } = props;
-
-		_id = _id ?? randomUUID();
 
 		const emailOrError = Email.create(email);
 
