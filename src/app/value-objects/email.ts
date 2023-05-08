@@ -1,15 +1,13 @@
 import { Either, left, right } from '../errors/either';
+import { ValueObject } from './value-object';
 
 export interface EmailProps {
 	value: string;
 }
 
-export class Email {
-	private props: EmailProps;
-
+export class Email extends ValueObject<EmailProps> {
 	private constructor(props: EmailProps) {
-		this.props = props;
-		Object.freeze(this);
+		super(props);
 	}
 
 	private static isEmailValid(email: string) {
@@ -21,7 +19,7 @@ export class Email {
 
 	static create(email: string): Either<Error, Email> {
 		if (!Email.isEmailValid(email))
-			return left(new Error('Invalid email!'));
+			return left(new Error('Invalid email format!'));
 
 		return right(new Email({ value: email }));
 	}
