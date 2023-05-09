@@ -26,7 +26,7 @@ export class UserSignUp {
 		)
 			return left(new Error('Operation not authorized!'));
 
-		const userOrError = User.create({
+		const userOrError = await User.create({
 			firstName,
 			lastName,
 			email,
