@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest';
 import { User } from './user';
 
 describe('User entity', function () {
-	it('should be able to create an user', function () {
-		const userOrError = User.create({
+	it('should be able to create an user', async function () {
+		const userOrError = await User.create({
 			firstName: 'John',
 			lastName: 'Doe',
 			isAdmin: true,
