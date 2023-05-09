@@ -9,18 +9,18 @@ describe('Password value object', function () {
 		if (password.isLeft()) return;
 
 		expect(password.value).toBeInstanceOf(Password);
-		expect(password.value.compare(stringPassword)).resolves.toBeTruthy();
+		expect(await password.value.compare(stringPassword)).toBeTruthy();
 	});
 
 	it('should be able to compare passwords', async function () {
 		const rightPass = 'eXamPlePassWorDD';
 		const wrongPass = 'eXamPleWrONgPassWorDD';
-		const password = await Password.create(rightPass);
+		const passwordOrError = await Password.create(rightPass);
 
-		if (password.isLeft()) return;
+		if (passwordOrError.isLeft()) return;
 
-		expect(password.value).toBeInstanceOf(Password);
-		expect(password.value.compare(rightPass)).resolves.toBeTruthy();
-		expect(password.value.compare(wrongPass)).resolves.toBeFalsy();
+		expect(passwordOrError.value).toBeInstanceOf(Password);
+		expect(await passwordOrError.value.compare(rightPass)).toBeTruthy();
+		expect(await passwordOrError.value.compare(wrongPass)).toBeFalsy();
 	});
 });
