@@ -4,11 +4,11 @@ import { InMemoryUsersRepository } from '../../../tests/repositories/in-memory-u
 import { User } from '../../entities/user';
 import { UserSignUp } from './user-sign-up';
 
-function makeSut() {
+async function makeSut() {
 	const usersRepository = new InMemoryUsersRepository();
 	const userSignUp = new UserSignUp(usersRepository);
 
-	const adminOrError = User.create({
+	const adminOrError = await User.create({
 		firstName: 'Admin',
 		lastName: '',
 		email: 'admin@email.com',
@@ -21,7 +21,7 @@ function makeSut() {
 
 describe('User sign up', function () {
 	it('should be able to sign up', async function () {
-		const { userSignUp, usersRepository, adminOrError } = makeSut();
+		const { userSignUp, usersRepository, adminOrError } = await makeSut();
 
 		if (adminOrError.isLeft()) return;
 
@@ -42,10 +42,10 @@ describe('User sign up', function () {
 		expect(response.value).toBeInstanceOf(User);
 	});
 
-	describe('should not be able to sign up when sending invalid admin id', async function () {
-		const { userSignUp, usersRepository, adminOrError } = makeSut();
+	describe('should not be able to sign up when sending', async function () {
+		const { userSignUp, usersRepository, adminOrError } = await makeSut();
 
-		const rootOrError = User.create({
+		const rootOrError = await User.create({
 			firstName: 'Not Admin',
 			lastName: '',
 			email: 'notadmin@email.com',
@@ -58,7 +58,7 @@ describe('User sign up', function () {
 		await usersRepository.create(adminOrError.value);
 		await usersRepository.create(rootOrError.value);
 
-		test('random uuid', async function () {
+		test('non registered uuid', async function () {
 			const response = await userSignUp.execute({
 				adminId: randomUUID(),
 				userProps: {
@@ -92,7 +92,7 @@ describe('User sign up', function () {
 	});
 
 	it('should not be able to sign up when using an email already registered', async function () {
-		const { userSignUp, usersRepository, adminOrError } = makeSut();
+		const { userSignUp, usersRepository, adminOrError } = await makeSut();
 
 		if (adminOrError.isLeft()) return;
 
