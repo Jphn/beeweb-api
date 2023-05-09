@@ -1,34 +1,46 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, test } from 'vitest';
 import { InMemoryUsersRepository } from '../../../tests/repositories/in-memory-users-repository';
 import { User } from '../../entities/user';
 import { UserSignIn } from './user-sign-in';
 
-function makeSut() {
+async function makeSut() {
 	const usersRepository = new InMemoryUsersRepository();
 	const userSignIn = new UserSignIn(usersRepository);
 
-	const userOrError = User.create({
+	const rightPassword = 'password';
+	const wrongPassword = 'wrongPassword';
+
+	const userOrError = await User.create({
 		firstName: 'John',
 		lastName: 'Doe',
 		email: 'johndoe@email.com',
 		isAdmin: false,
-		password: 'hash',
+		password: rightPassword,
 	});
 
-	return { usersRepository, userSignIn, userOrError };
+	return {
+		usersRepository,
+		userSignIn,
+		rightPassword,
+		wrongPassword,
+		userOrError,
+	};
 }
 
 describe('User sign in', function () {
 	it('should be able to sign in', async function () {
-		const { usersRepository, userSignIn, userOrError } = makeSut();
+		const { usersRepository, userSignIn, rightPassword, userOrError } =
+			await makeSut();
 
 		if (userOrError.isLeft()) return;
 
-		await usersRepository.create(userOrError.value);
+		const { value: user } = userOrError;
+
+		await usersRepository.create(user);
 
 		const response = await userSignIn.execute({
-			email: userOrError.value.email.value,
-			password: userOrError.value.password,
+			email: user.email.value,
+			password: rightPassword,
 		});
 
 		expect(response.isRight()).toBeTruthy();
@@ -36,14 +48,15 @@ describe('User sign in', function () {
 	});
 
 	it('should not be able to sign in when user is not registered', async function () {
-		const { usersRepository, userSignIn, userOrError } = makeSut();
+		const { usersRepository, userSignIn, wrongPassword, userOrError } =
+			await makeSut();
 
 		if (userOrError.isRight()) {
 			await usersRepository.create(userOrError.value);
 
 			const response = await userSignIn.execute({
 				email: 'doejohn@email.com',
-				password: 'password',
+				password: wrongPassword,
 			});
 
 			expect(response.isLeft()).toBeTruthy();
@@ -51,19 +64,48 @@ describe('User sign in', function () {
 		}
 	});
 
-	it('should not be able to sign in when user password is wrong', async function () {
-		const { usersRepository, userSignIn, userOrError } = makeSut();
+	describe('should not be able to sign in when passing...', async function () {
+		const {
+			usersRepository,
+			userSignIn,
+			rightPassword,
+			wrongPassword,
+			userOrError,
+		} = await makeSut();
 
-		if (userOrError.isRight()) {
-			await usersRepository.create(userOrError.value);
+		if (userOrError.isLeft()) return;
+		const { value: user } = userOrError;
 
+		await usersRepository.create(user);
+
+		test('wrong password', async function () {
 			const response = await userSignIn.execute({
-				email: userOrError.value.email.value,
-				password: 'wrongPassword',
+				email: user.email.value,
+				password: wrongPassword,
 			});
 
 			expect(response.isLeft()).toBeTruthy();
 			expect(response.value).toBeInstanceOf(Error);
-		}
+		});
+
+		test('wrong email', async function () {
+			const response = await userSignIn.execute({
+				email: 'wrongemail@email.com',
+				password: rightPassword,
+			});
+
+			expect(response.isLeft()).toBeTruthy();
+			expect(response.value).toBeInstanceOf(Error);
+		});
+
+		test('both wrong', async function () {
+			const response = await userSignIn.execute({
+				email: 'wrongemail@email.com',
+				password: wrongPassword,
+			});
+
+			expect(response.isLeft()).toBeTruthy();
+			expect(response.value).toBeInstanceOf(Error);
+		});
 	});
 });
