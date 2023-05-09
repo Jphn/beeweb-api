@@ -16,14 +16,15 @@ export class UserSignIn {
 		email,
 		password,
 	}: UserSignInRequest): Promise<UserSignInResponse> {
-		const user = await this.usersRepository.findUserByEmail(email);
+		const userOrError = await this.usersRepository.findUserByEmail(email);
 
 		if (
-			user.isLeft() ||
-			(user.isRight() && user.value.password != password)
+			userOrError.isLeft() ||
+			(userOrError.isRight() &&
+				!(await userOrError.value.password.compare(password)))
 		)
 			return left(new Error('Invalid email or password!'));
 
-		return right(user.value);
+		return right(userOrError.value);
 	}
 }
