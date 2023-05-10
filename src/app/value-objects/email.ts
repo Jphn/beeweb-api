@@ -14,7 +14,7 @@ export class Email extends ValueObject<EmailProps> {
 		const validRegex =
 			/^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/;
 
-		return email.match(validRegex);
+		return !!email.match(validRegex);
 	}
 
 	static create(email: string): Either<Error, Email> {
