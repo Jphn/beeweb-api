@@ -42,7 +42,7 @@ describe('User sign up', function () {
 		expect(response.value).toBeInstanceOf(User);
 	});
 
-	describe('should not be able to sign up when sending', async function () {
+	describe('should not be able to sign up when sending...', async function () {
 		const { userSignUp, usersRepository, adminOrError } = await makeSut();
 
 		const rootOrError = await User.create({
