@@ -27,7 +27,7 @@ async function makeSut() {
 	};
 }
 
-describe('User sign in', function () {
+describe('[Use Case] User sign in', function () {
 	it('should be able to sign in', async function () {
 		const { usersRepository, userSignIn, rightPassword, userOrError } =
 			await makeSut();

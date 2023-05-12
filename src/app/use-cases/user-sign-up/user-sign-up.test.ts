@@ -19,7 +19,7 @@ async function makeSut() {
 	return { usersRepository, userSignUp, adminOrError };
 }
 
-describe('User sign up', function () {
+describe('[Use Case] User sign up', function () {
 	it('should be able to sign up', async function () {
 		const { userSignUp, usersRepository, adminOrError } = await makeSut();
 

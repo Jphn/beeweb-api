@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Password } from './password';
 
-describe('Password value object', function () {
+describe('[Value Object] Password', function () {
 	it('should be able to create a new password', async function () {
 		const stringPassword = 'eXamPlePassWorDD';
 		const password = await Password.create(stringPassword);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { Email } from './email';
 
-describe('Email value object', function () {
+describe('[Value Object] Email', function () {
 	it('should be able to create an email', function () {
 		const email = Email.create('example@email.com');
 
