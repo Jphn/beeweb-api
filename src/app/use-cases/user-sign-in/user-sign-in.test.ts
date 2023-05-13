@@ -27,10 +27,11 @@ async function makeSut() {
 	};
 }
 
-describe('[Use Case] User sign in', function () {
+describe('[Use Case] User sign in', async function () {
+	const sut = await makeSut();
+
 	it('should be able to sign in', async function () {
-		const { usersRepository, userSignIn, rightPassword, userOrError } =
-			await makeSut();
+		const { usersRepository, userSignIn, rightPassword, userOrError } = sut;
 
 		if (userOrError.isLeft()) return;
 
@@ -48,8 +49,7 @@ describe('[Use Case] User sign in', function () {
 	});
 
 	it('should not be able to sign in when user is not registered', async function () {
-		const { usersRepository, userSignIn, wrongPassword, userOrError } =
-			await makeSut();
+		const { usersRepository, userSignIn, wrongPassword, userOrError } = sut;
 
 		if (userOrError.isRight()) {
 			await usersRepository.create(userOrError.value);
@@ -71,7 +71,7 @@ describe('[Use Case] User sign in', function () {
 			rightPassword,
 			wrongPassword,
 			userOrError,
-		} = await makeSut();
+		} = sut;
 
 		if (userOrError.isLeft()) return;
 		const { value: user } = userOrError;
