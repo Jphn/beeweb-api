@@ -47,13 +47,15 @@ export class PostgresUsersRepository implements UsersRepository {
 	}
 
 	async findUserById(id: string): Promise<Either<Error, User>> {
-		const user =
-			this.items.find((user) => {
-				return user.id == id;
-			}) || null;
+		const response = await this.repository.findOneBy({ id: id });
 
-		if (user === null) return left(new Error('User id not found!'));
+		if (response === null) return left(new Error('User id not found!'));
 
-		return right(user);
+		const userOrError = await User.create(response, response.id);
+
+		if (userOrError.isLeft())
+			return left(new Error('Error creating user!'));
+
+		return right(userOrError.value);
 	}
 }
