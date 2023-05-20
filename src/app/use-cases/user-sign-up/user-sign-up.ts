@@ -3,7 +3,8 @@ import { Either, left, right } from '../../errors/either';
 import { UsersRepository } from '../../repositories/users-repository';
 
 type UserSignUpRequest = {
-	adminId: string;
+	adminEmail: string;
+	adminPassword: string;
 	userProps: UserCreateProps;
 };
 
@@ -13,18 +14,25 @@ export class UserSignUp {
 	constructor(private usersRepository: UsersRepository) {}
 
 	async execute({
-		adminId,
+		adminEmail,
+		adminPassword,
 		userProps,
 	}: UserSignUpRequest): Promise<UserSignUpResponse> {
-		const adminOrError = await this.usersRepository.findUserById(adminId);
-
-		const { firstName, lastName, email, password, isAdmin } = userProps;
+		const adminOrError = await this.usersRepository.findUserByEmail(
+			adminEmail
+		);
 
 		if (
 			adminOrError.isLeft() ||
-			(adminOrError.isRight() && !adminOrError.value.isAdmin)
+			(adminOrError.isRight() &&
+				(!adminOrError.value.isAdmin ||
+					!(await adminOrError.value.password.compare(
+						adminPassword
+					))))
 		)
 			return left(new Error('Operation not authorized!'));
+
+		const { firstName, lastName, email, password, isAdmin } = userProps;
 
 		const userOrError = await User.create({
 			firstName,

@@ -19,8 +19,11 @@ export class Password extends ValueObject<PasswordProps> {
 		return passwordHash;
 	}
 
-	static async create(password: string): Promise<Either<Error, Password>> {
-		password = await Password.crypto(password);
+	static async create(
+		password: string,
+		isHash?: boolean
+	): Promise<Either<Error, Password>> {
+		password = isHash ? password : await Password.crypto(password);
 
 		return right(new Password({ value: password }));
 	}

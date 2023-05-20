@@ -1,4 +1,3 @@
-import { randomUUID } from 'crypto';
 import { describe, expect, it, test } from 'vitest';
 import { InMemoryUsersRepository } from '../../../tests/repositories/in-memory-users-repository';
 import { User } from '../../entities/user';
@@ -8,27 +7,35 @@ async function makeSut() {
 	const usersRepository = new InMemoryUsersRepository();
 	const userSignUp = new UserSignUp(usersRepository);
 
+	const validPassword = 'password';
+
 	const adminOrError = await User.create({
 		firstName: 'Admin',
 		lastName: '',
 		email: 'admin@email.com',
-		password: 'password',
+		password: validPassword,
 		isAdmin: true,
 	});
 
-	return { usersRepository, userSignUp, adminOrError };
+	return { usersRepository, userSignUp, validPassword, adminOrError };
 }
 
-describe('[Use Case] User sign up', function () {
+describe('[Use Case] User sign up', async function () {
+	const sut = await makeSut();
+
 	it('should be able to sign up', async function () {
-		const { userSignUp, usersRepository, adminOrError } = await makeSut();
+		const { userSignUp, usersRepository, validPassword, adminOrError } =
+			sut;
 
 		if (adminOrError.isLeft()) return;
 
 		await usersRepository.create(adminOrError.value);
 
+		const { email } = adminOrError.value;
+
 		const response = await userSignUp.execute({
-			adminId: adminOrError.value.id,
+			adminEmail: email.value,
+			adminPassword: validPassword,
 			userProps: {
 				email: 'johndoe@email.com',
 				password: 'password',
@@ -43,13 +50,16 @@ describe('[Use Case] User sign up', function () {
 	});
 
 	describe('should not be able to sign up when sending...', async function () {
-		const { userSignUp, usersRepository, adminOrError } = await makeSut();
+		const { userSignUp, usersRepository, validPassword, adminOrError } =
+			sut;
+
+		const invalidPassword = 'rootPassword';
 
 		const rootOrError = await User.create({
 			firstName: 'Not Admin',
 			lastName: '',
 			email: 'notadmin@email.com',
-			password: 'password',
+			password: invalidPassword,
 			isAdmin: false,
 		});
 
@@ -58,9 +68,13 @@ describe('[Use Case] User sign up', function () {
 		await usersRepository.create(adminOrError.value);
 		await usersRepository.create(rootOrError.value);
 
-		test('non registered uuid', async function () {
+		const { email: validEmail } = adminOrError.value;
+		const { email: invalidEmail } = rootOrError.value;
+
+		test('non registered email', async function () {
 			const response = await userSignUp.execute({
-				adminId: randomUUID(),
+				adminEmail: 'nonregistered@email.com',
+				adminPassword: validPassword,
 				userProps: {
 					email: 'johndoe@email.com',
 					password: 'password',
@@ -74,9 +88,27 @@ describe('[Use Case] User sign up', function () {
 			expect(response.value).toBeInstanceOf(Error);
 		});
 
-		test('root user uuid', async function () {
+		test('root user email', async function () {
 			const response = await userSignUp.execute({
-				adminId: rootOrError.value.id,
+				adminEmail: invalidEmail.value,
+				adminPassword: validPassword,
+				userProps: {
+					email: 'johndoe@email.com',
+					password: 'password',
+					firstName: 'John',
+					lastName: 'Doe',
+					isAdmin: false,
+				},
+			});
+
+			expect(response.isLeft()).toBeTruthy();
+			expect(response.value).toBeInstanceOf(Error);
+		});
+
+		test('invalid password', async function () {
+			const response = await userSignUp.execute({
+				adminEmail: validEmail.value,
+				adminPassword: invalidPassword,
 				userProps: {
 					email: 'johndoe@email.com',
 					password: 'password',
@@ -92,14 +124,18 @@ describe('[Use Case] User sign up', function () {
 	});
 
 	it('should not be able to sign up when using an email already registered', async function () {
-		const { userSignUp, usersRepository, adminOrError } = await makeSut();
+		const { userSignUp, usersRepository, validPassword, adminOrError } =
+			sut;
 
 		if (adminOrError.isLeft()) return;
 
 		await usersRepository.create(adminOrError.value);
 
+		const { email: validEmail } = adminOrError.value;
+
 		const response = await userSignUp.execute({
-			adminId: adminOrError.value.id,
+			adminEmail: validEmail.value,
+			adminPassword: validPassword,
 			userProps: {
 				email: adminOrError.value.email.value,
 				password: 'password',

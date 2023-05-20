@@ -23,13 +23,13 @@ export class User extends Entity<UserProps> {
 		props: UserCreateProps,
 		_id?: string
 	): Promise<Either<Error, User>> {
-		const { firstName, lastName, email, password, isAdmin } = props;
+		const { firstName, lastName, email, isAdmin } = props;
 
 		const emailOrError = Email.create(email);
 
 		if (emailOrError.isLeft()) return left(emailOrError.value);
 
-		const passwordOrError = await Password.create(password);
+		const passwordOrError = await Password.create(props.password, !!_id);
 
 		if (passwordOrError.isLeft()) return left(passwordOrError.value);
 
