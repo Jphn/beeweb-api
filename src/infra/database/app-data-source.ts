@@ -18,4 +18,5 @@ export const AppDataSource = new DataSource({
 	database: TYPEORM_DATABASE,
 	migrations: ['src/infra/database/migrations/*.ts'],
 	entities: ['src/infra/database/schemas/*.ts'],
+	migrationsRun: true,
 });
