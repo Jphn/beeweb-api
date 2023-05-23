@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CustomError } from '../errors/custom-error';
 import { Email } from './email';
 
 describe('[Value Object] Email', function () {
@@ -13,6 +14,6 @@ describe('[Value Object] Email', function () {
 		const email = Email.create('invalid email format');
 
 		expect(email.isRight()).toBeFalsy();
-		expect(email.value).toBeInstanceOf(Error);
+		expect(email.value).toBeInstanceOf(CustomError);
 	});
 });

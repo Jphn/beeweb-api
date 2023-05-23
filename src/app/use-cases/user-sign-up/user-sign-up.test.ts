@@ -1,6 +1,7 @@
 import { describe, expect, it, test } from 'vitest';
 import { InMemoryUsersRepository } from '../../../tests/repositories/in-memory-users-repository';
 import { User } from '../../entities/user';
+import { CustomError } from '../../errors/custom-error';
 import { UserSignUp } from './user-sign-up';
 
 async function makeSut() {
@@ -71,7 +72,7 @@ describe('[Use Case] User sign up', async function () {
 		const { email: validEmail } = adminOrError.value;
 		const { email: invalidEmail } = rootOrError.value;
 
-		test('non registered email', async function () {
+		test('non registered email as admin email', async function () {
 			const response = await userSignUp.execute({
 				adminEmail: 'nonregistered@email.com',
 				adminPassword: validPassword,
@@ -85,10 +86,10 @@ describe('[Use Case] User sign up', async function () {
 			});
 
 			expect(response.isLeft()).toBeTruthy();
-			expect(response.value).toBeInstanceOf(Error);
+			expect(response.value).toBeInstanceOf(CustomError);
 		});
 
-		test('root user email', async function () {
+		test('root user email as admin email', async function () {
 			const response = await userSignUp.execute({
 				adminEmail: invalidEmail.value,
 				adminPassword: validPassword,
@@ -102,10 +103,10 @@ describe('[Use Case] User sign up', async function () {
 			});
 
 			expect(response.isLeft()).toBeTruthy();
-			expect(response.value).toBeInstanceOf(Error);
+			expect(response.value).toBeInstanceOf(CustomError);
 		});
 
-		test('invalid password', async function () {
+		test('invalid password as admin pass', async function () {
 			const response = await userSignUp.execute({
 				adminEmail: validEmail.value,
 				adminPassword: invalidPassword,
@@ -119,7 +120,7 @@ describe('[Use Case] User sign up', async function () {
 			});
 
 			expect(response.isLeft()).toBeTruthy();
-			expect(response.value).toBeInstanceOf(Error);
+			expect(response.value).toBeInstanceOf(CustomError);
 		});
 	});
 
@@ -146,6 +147,6 @@ describe('[Use Case] User sign up', async function () {
 		});
 
 		expect(response.isLeft()).toBeTruthy();
-		expect(response.value).toBeInstanceOf(Error);
+		expect(response.value).toBeInstanceOf(CustomError);
 	});
 });

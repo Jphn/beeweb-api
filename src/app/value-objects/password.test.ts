@@ -30,4 +30,6 @@ describe('[Value Object] Password', async function () {
 		expect(await passwordOrError.value.compare(rightPass)).toBeTruthy();
 		expect(await passwordOrError.value.compare(wrongPass)).toBeFalsy();
 	});
+
+	it.todo('should not be able to create invalid password');
 });
