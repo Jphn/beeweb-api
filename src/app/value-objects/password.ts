@@ -1,5 +1,6 @@
 import { compare, hash } from 'bcrypt';
 import { randomInt } from 'crypto';
+import { CustomError } from '../errors/custom-error';
 import { Either, right } from '../errors/either';
 import { ValueObject } from './value-object';
 
@@ -22,7 +23,7 @@ export class Password extends ValueObject<PasswordProps> {
 	static async create(
 		password: string,
 		isHash?: boolean
-	): Promise<Either<Error, Password>> {
+	): Promise<Either<CustomError, Password>> {
 		password = isHash ? password : await Password.crypto(password);
 
 		return right(new Password({ value: password }));

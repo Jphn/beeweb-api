@@ -39,9 +39,15 @@ export default async function (app: FastifyJsonSchemaToTsInstance) {
 				userProps: request.body.payload,
 			});
 
-			if (response.isLeft()) return { msg: response.value.message };
+			if (response.isLeft()) {
+				reply.code(response.value.statusCode);
 
-			return request.body;
+				return response.value;
+			}
+
+			reply.code(201);
+
+			return response.value;
 		}
 	);
 }

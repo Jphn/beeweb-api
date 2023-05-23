@@ -1,4 +1,5 @@
 import { User, UserCreateProps } from '../../entities/user';
+import { CustomError } from '../../errors/custom-error';
 import { Either, left, right } from '../../errors/either';
 import { UsersRepository } from '../../repositories/users-repository';
 
@@ -8,7 +9,7 @@ type UserSignUpRequest = {
 	userProps: UserCreateProps;
 };
 
-type UserSignUpResponse = Either<Error, User>;
+type UserSignUpResponse = Either<CustomError, User>;
 
 export class UserSignUp {
 	constructor(private usersRepository: UsersRepository) {}
@@ -30,7 +31,7 @@ export class UserSignUp {
 						adminPassword
 					))))
 		)
-			return left(new Error('Operation not authorized!'));
+			return left(new CustomError('Operation not authorized!', 401));
 
 		const { firstName, lastName, email, password, isAdmin } = userProps;
 
