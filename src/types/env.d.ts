@@ -3,6 +3,7 @@ declare global {
 		interface ProcessEnv {
 			NODE_ENV?: 'development' | 'production';
 			PORT: number;
+			JWT_SECRET: string;
 			TYPEORM_HOST: string;
 			TYPEORM_USERNAME: string;
 			TYPEORM_PASSWORD: string;

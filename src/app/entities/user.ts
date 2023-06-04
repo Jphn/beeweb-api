@@ -1,3 +1,4 @@
+import { CustomError } from '../errors/custom-error';
 import { Either, left, right } from '../errors/either';
 import { Email } from '../value-objects/email';
 import { Password } from '../value-objects/password';
@@ -22,7 +23,7 @@ export class User extends Entity<UserProps> {
 	static async create(
 		props: UserCreateProps,
 		_id?: string
-	): Promise<Either<Error, User>> {
+	): Promise<Either<CustomError, User>> {
 		const { firstName, lastName, email, isAdmin } = props;
 
 		const emailOrError = Email.create(email);

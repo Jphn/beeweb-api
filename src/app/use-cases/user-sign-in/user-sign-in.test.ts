@@ -1,6 +1,7 @@
 import { describe, expect, it, test } from 'vitest';
 import { InMemoryUsersRepository } from '../../../tests/repositories/in-memory-users-repository';
 import { User } from '../../entities/user';
+import { CustomError } from '../../errors/custom-error';
 import { UserSignIn } from './user-sign-in';
 
 async function makeSut() {
@@ -60,7 +61,7 @@ describe('[Use Case] User sign in', async function () {
 			});
 
 			expect(response.isLeft()).toBeTruthy();
-			expect(response.value).toBeInstanceOf(Error);
+			expect(response.value).toBeInstanceOf(CustomError);
 		}
 	});
 
@@ -85,7 +86,7 @@ describe('[Use Case] User sign in', async function () {
 			});
 
 			expect(response.isLeft()).toBeTruthy();
-			expect(response.value).toBeInstanceOf(Error);
+			expect(response.value).toBeInstanceOf(CustomError);
 		});
 
 		test('wrong email', async function () {
@@ -95,7 +96,7 @@ describe('[Use Case] User sign in', async function () {
 			});
 
 			expect(response.isLeft()).toBeTruthy();
-			expect(response.value).toBeInstanceOf(Error);
+			expect(response.value).toBeInstanceOf(CustomError);
 		});
 
 		test('both wrong', async function () {
@@ -105,7 +106,7 @@ describe('[Use Case] User sign in', async function () {
 			});
 
 			expect(response.isLeft()).toBeTruthy();
-			expect(response.value).toBeInstanceOf(Error);
+			expect(response.value).toBeInstanceOf(CustomError);
 		});
 	});
 });

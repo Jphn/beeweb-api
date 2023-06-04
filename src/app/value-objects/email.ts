@@ -1,3 +1,4 @@
+import { CustomError } from '../errors/custom-error';
 import { Either, left, right } from '../errors/either';
 import { ValueObject } from './value-object';
 
@@ -17,9 +18,9 @@ export class Email extends ValueObject<EmailProps> {
 		return !!email.match(validRegex);
 	}
 
-	static create(email: string): Either<Error, Email> {
+	static create(email: string): Either<CustomError, Email> {
 		if (!Email.isEmailValid(email))
-			return left(new Error('Invalid email format!'));
+			return left(new CustomError('Invalid email format!', 400));
 
 		return right(new Email({ value: email }));
 	}

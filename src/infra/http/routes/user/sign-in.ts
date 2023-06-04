@@ -36,9 +36,15 @@ export default async function (app: FastifyJsonSchemaToTsInstance) {
 				password: request.body.password,
 			});
 
-			if (response.isLeft()) return { msg: response.value.message };
+			if (response.isLeft()) return response.value;
 
-			return response.value;
+			reply.code(202);
+
+			const { id, email } = response.value;
+
+			const token = app.jwt.sign({ id, email: email.value });
+
+			return { token };
 		}
 	);
 }
