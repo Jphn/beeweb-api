@@ -10,7 +10,7 @@ export default {
 
 		lastName: { type: 'string', minLength: 4 },
 
-		email: { type: 'string', minLength: 10 },
+		email: { type: 'string', format: 'email' },
 
 		password: {
 			type: 'string',
