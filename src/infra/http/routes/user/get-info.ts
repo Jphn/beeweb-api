@@ -1,4 +1,3 @@
-import { CustomError } from '../../../../app/errors/custom-error';
 import { GetUserInfoUseCase } from '../../../../app/use-cases/get-user-info/get-user-info';
 import { FastifyJsonSchemaToTsInstance } from '../../../app';
 import { postgresUsersRepository } from '../../../database/repositories';
@@ -30,9 +29,6 @@ export default async function (app: FastifyJsonSchemaToTsInstance) {
 		},
 		async function (req, res) {
 			await req.jwtVerify();
-
-			if (!req.user.isAdmin)
-				return new CustomError('Not authorized!', 401);
 
 			const response = await getUserInfoUseCase.execute({
 				id: req.params.id,
