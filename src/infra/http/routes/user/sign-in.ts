@@ -19,7 +19,7 @@ const body = {
 	},
 } as const;
 
-export default async function(app: FastifyJsonSchemaToTsInstance) {
+export default async function (app: FastifyJsonSchemaToTsInstance) {
 	const usersRepository = postgresUsersRepository;
 	const userSignIn = new UserSignIn(usersRepository);
 
@@ -30,7 +30,7 @@ export default async function(app: FastifyJsonSchemaToTsInstance) {
 				body,
 			},
 		},
-		async function(request, reply) {
+		async function (request, reply) {
 			const response = await userSignIn.execute({
 				email: request.body.email,
 				password: request.body.password,
@@ -40,9 +40,9 @@ export default async function(app: FastifyJsonSchemaToTsInstance) {
 
 			reply.code(202);
 
-			const { id, isAdmin } = response.value;
+			const { id, email } = response.value;
 
-			const token = app.jwt.sign({ id, isAdmin });
+			const token = app.jwt.sign({ id, email: email.value });
 
 			return { token };
 		}
