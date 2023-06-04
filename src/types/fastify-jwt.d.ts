@@ -4,11 +4,11 @@ declare module '@fastify/jwt' {
 	interface FastifyJWT {
 		payload: {
 			id: string;
-			isAdmin: boolean;
+			email: string;
 		}; // payload type is used for signing and verifying
 		user: {
 			id: string;
-			isAdmin: boolean;
+			email: string;
 		}; // user type is return type of `request.user` object
 	}
 }
