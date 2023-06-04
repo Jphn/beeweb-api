@@ -33,6 +33,8 @@ export default async function (app: FastifyJsonSchemaToTsInstance) {
 			},
 		},
 		async function (request, reply) {
+			await request.jwtVerify();
+
 			const response = await userSignUp.execute({
 				adminEmail: request.body.adminEmail,
 				adminPassword: request.body.adminPassword,
