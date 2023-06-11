@@ -14,8 +14,8 @@ export default {
 
 		password: {
 			type: 'string',
-			minLength: 8,
-			maxLength: 14,
+			minLength: 12,
+			maxLength: 15,
 		},
 
 		isAdmin: {
