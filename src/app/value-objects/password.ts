@@ -1,7 +1,7 @@
 import { compare, hash } from 'bcrypt';
 import { randomInt } from 'crypto';
 import { CustomError } from '../errors/custom-error';
-import { Either, right } from '../errors/either';
+import { Either, left, right } from '../errors/either';
 import { ValueObject } from './value-object';
 
 export interface PasswordProps {
@@ -20,11 +20,25 @@ export class Password extends ValueObject<PasswordProps> {
 		return passwordHash;
 	}
 
+	static validate(password: string): boolean {
+		const expression =
+			/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[^a-zA-Z0-9])(?!.*\s).{12,15}$/;
+
+		const isValid = !!password.match(expression);
+
+		return isValid;
+	}
+
 	static async create(
 		password: string,
 		isHash?: boolean
 	): Promise<Either<CustomError, Password>> {
-		password = isHash ? password : await Password.crypto(password);
+		if (!isHash) {
+			if (!Password.validate(password))
+				return left(new CustomError('Invalid password format!', 406));
+
+			password = await Password.crypto(password);
+		}
 
 		return right(new Password({ value: password }));
 	}
