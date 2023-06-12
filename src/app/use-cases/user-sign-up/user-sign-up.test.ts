@@ -8,7 +8,8 @@ async function makeSut() {
 	const usersRepository = new InMemoryUsersRepository();
 	const userSignUp = new UserSignUp(usersRepository);
 
-	const validPassword = 'password';
+	const validPassword = 'sTr0ng^pa55worD';
+	const invalidPassword = 'sTr0ng^pa55w0rD';
 
 	const adminOrError = await User.create({
 		firstName: 'Admin',
@@ -18,7 +19,13 @@ async function makeSut() {
 		isAdmin: true,
 	});
 
-	return { usersRepository, userSignUp, validPassword, adminOrError };
+	return {
+		usersRepository,
+		userSignUp,
+		validPassword,
+		invalidPassword,
+		adminOrError,
+	};
 }
 
 describe('[Use Case] User sign up', async function () {
@@ -39,7 +46,7 @@ describe('[Use Case] User sign up', async function () {
 			adminPassword: validPassword,
 			userProps: {
 				email: 'johndoe@email.com',
-				password: 'password',
+				password: validPassword,
 				firstName: 'John',
 				lastName: 'Doe',
 				isAdmin: false,
@@ -51,10 +58,13 @@ describe('[Use Case] User sign up', async function () {
 	});
 
 	describe('should not be able to sign up when sending...', async function () {
-		const { userSignUp, usersRepository, validPassword, adminOrError } =
-			sut;
-
-		const invalidPassword = 'rootPassword';
+		const {
+			userSignUp,
+			usersRepository,
+			validPassword,
+			invalidPassword,
+			adminOrError,
+		} = sut;
 
 		const rootOrError = await User.create({
 			firstName: 'Not Admin',

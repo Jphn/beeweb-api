@@ -8,8 +8,8 @@ async function makeSut() {
 	const usersRepository = new InMemoryUsersRepository();
 	const userSignIn = new UserSignIn(usersRepository);
 
-	const rightPassword = 'password';
-	const wrongPassword = 'wrongPassword';
+	const rightPassword = 'sTr0ng^pa55worD';
+	const wrongPassword = 'sTr0ng^pa55w0rD';
 
 	const userOrError = await User.create({
 		firstName: 'John',
@@ -18,6 +18,11 @@ async function makeSut() {
 		isAdmin: false,
 		password: rightPassword,
 	});
+
+	if (userOrError.isLeft())
+		throw new Error('Error when creating user inside makeSut!');
+
+	await usersRepository.create(userOrError.value);
 
 	return {
 		usersRepository,
@@ -34,11 +39,7 @@ describe('[Use Case] User sign in', async function () {
 	it('should be able to sign in', async function () {
 		const { usersRepository, userSignIn, rightPassword, userOrError } = sut;
 
-		if (userOrError.isLeft()) return;
-
 		const { value: user } = userOrError;
-
-		await usersRepository.create(user);
 
 		const response = await userSignIn.execute({
 			email: user.email.value,
@@ -47,6 +48,7 @@ describe('[Use Case] User sign in', async function () {
 
 		expect(response.isRight()).toBeTruthy();
 		expect(response.value).toBeInstanceOf(User);
+		expect(usersRepository.items).toContainEqual(user);
 	});
 
 	it('should not be able to sign in when user is not registered', async function () {
@@ -74,10 +76,9 @@ describe('[Use Case] User sign in', async function () {
 			userOrError,
 		} = sut;
 
-		if (userOrError.isLeft()) return;
 		const { value: user } = userOrError;
 
-		await usersRepository.create(user);
+		expect(usersRepository.items).toContainEqual(user);
 
 		test('wrong password', async function () {
 			const response = await userSignIn.execute({
