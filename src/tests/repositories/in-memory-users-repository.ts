@@ -4,7 +4,7 @@ import { Either, left, right } from '../../app/errors/either';
 import { UsersRepository } from '../../app/repositories/users-repository';
 
 export class InMemoryUsersRepository implements UsersRepository {
-	private items: User[] = [];
+	public readonly items: User[] = [];
 
 	async create(user: User): Promise<Either<CustomError, null>> {
 		const conflictingUser = await this.findUserByEmail(user.email.value);
@@ -39,5 +39,9 @@ export class InMemoryUsersRepository implements UsersRepository {
 			return left(new CustomError('User id not found!', 404));
 
 		return right(user);
+	}
+
+	clear() {
+		this.items.length = 0;
 	}
 }

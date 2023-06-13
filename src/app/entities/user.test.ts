@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { CustomError } from '../errors/custom-error';
 import { User } from './user';
 
 describe('[Entity] User', function () {
@@ -8,7 +9,7 @@ describe('[Entity] User', function () {
 			lastName: 'Doe',
 			isAdmin: true,
 			email: 'johndoe@email.com',
-			password: 'hash',
+			password: 'sTr0ng^pa55worD',
 		});
 
 		expect(userOrError.value).toBeInstanceOf(User);
@@ -16,5 +17,17 @@ describe('[Entity] User', function () {
 		expect(userOrError.isRight()).toBeTruthy();
 	});
 
-	it.todo('should not be able to create when using invalid email format');
+	it('should not be able to create when using invalid email format', async function () {
+		const userOrError = await User.create({
+			firstName: 'John',
+			lastName: 'Doe',
+			isAdmin: true,
+			email: 'johndoe email com',
+			password: 'sTr0ng^pa55worD',
+		});
+
+		expect(userOrError.isLeft()).toBeTruthy();
+		expect(userOrError.isRight()).toBeFalsy();
+		expect(userOrError.value).toBeInstanceOf(CustomError);
+	});
 });
