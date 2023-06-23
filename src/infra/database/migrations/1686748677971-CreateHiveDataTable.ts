@@ -1,10 +1,10 @@
 import { MigrationInterface, QueryRunner, Table } from 'typeorm';
 
-export class CreateUsersTable1684152713426 implements MigrationInterface {
+export class CreateHiveDataTable1686748677971 implements MigrationInterface {
 	public async up(queryRunner: QueryRunner): Promise<void> {
 		await queryRunner.createTable(
 			new Table({
-				name: 'users',
+				name: 'hive_data',
 				columns: [
 					{
 						name: 'id',
@@ -12,29 +12,32 @@ export class CreateUsersTable1684152713426 implements MigrationInterface {
 						isPrimary: true,
 					},
 					{
-						name: 'first_name',
-						type: 'varchar',
+						name: 'hive_id',
+						type: 'uuid',
+					},
+					{
+						name: 'temp',
+						type: 'decimal',
 						isNullable: false,
 					},
 					{
-						name: 'last_name',
-						type: 'varchar',
+						name: 'humidity',
+						type: 'decimal',
 						isNullable: false,
 					},
 					{
-						name: 'email',
-						type: 'varchar',
-						isUnique: true,
+						name: 'weight',
+						type: 'decimal',
 						isNullable: false,
 					},
 					{
-						name: 'password',
-						type: 'varchar',
+						name: 'lux',
+						type: 'decimal',
 						isNullable: false,
 					},
 					{
-						name: 'is_admin',
-						type: 'boolean',
+						name: 'noise',
+						type: 'decimal',
 						isNullable: false,
 					},
 					{
@@ -43,11 +46,20 @@ export class CreateUsersTable1684152713426 implements MigrationInterface {
 						default: 'now()',
 					},
 				],
+				foreignKeys: [
+					{
+						columnNames: ['hive_id'],
+						referencedColumnNames: ['id'],
+						referencedTableName: 'hives',
+						onDelete: 'CASCADE',
+						onUpdate: 'CASCADE',
+					},
+				],
 			})
 		);
 	}
 
 	public async down(queryRunner: QueryRunner): Promise<void> {
-		await queryRunner.dropTable('users');
+		await queryRunner.dropTable('hive_data');
 	}
 }
