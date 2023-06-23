@@ -1,12 +1,15 @@
 import { EntitySchema } from 'typeorm';
 import { UserCreateProps } from '../../../app/entities/user';
+import { ApiaryEntityProps } from './apiary';
 
-export type UserSchema = {
+export type UserEntityProps = {
 	id: string;
+	apiaries: ApiaryEntityProps[];
 } & UserCreateProps;
 
-export const UserEntity = new EntitySchema<UserSchema>({
-	name: 'users',
+export const UserEntity = new EntitySchema<UserEntityProps>({
+	name: 'user',
+	tableName: 'users',
 	columns: {
 		id: {
 			type: 'uuid',
@@ -15,10 +18,12 @@ export const UserEntity = new EntitySchema<UserSchema>({
 		firstName: {
 			type: 'varchar',
 			nullable: false,
+			name: 'first_name',
 		},
 		lastName: {
 			type: 'varchar',
 			nullable: false,
+			name: 'last_name',
 		},
 		email: {
 			type: 'varchar',
@@ -32,6 +37,23 @@ export const UserEntity = new EntitySchema<UserSchema>({
 		isAdmin: {
 			type: 'boolean',
 			nullable: false,
+			name: 'is_admin',
+		},
+	},
+	relations: {
+		apiaries: {
+			type: 'many-to-many',
+			target: 'apiary',
+			inverseSide: 'users',
+			joinTable: {
+				name: 'users_apiaries',
+				joinColumn: {
+					name: 'user_id',
+				},
+				inverseJoinColumn: {
+					name: 'apiary_id',
+				},
+			},
 		},
 	},
 });
