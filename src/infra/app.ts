@@ -1,6 +1,6 @@
 import autoload from '@fastify/autoload';
-import jwt from '@fastify/jwt';
 import cors from '@fastify/cors';
+import jwt from '@fastify/jwt';
 import { JsonSchemaToTsProvider } from '@fastify/type-provider-json-schema-to-ts';
 import fastify from 'fastify';
 import path from 'path';
