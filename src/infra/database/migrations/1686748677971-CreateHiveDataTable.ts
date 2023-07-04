@@ -26,12 +26,12 @@ export class CreateHiveDataTable1686748677971 implements MigrationInterface {
 						isNullable: false,
 					},
 					{
-						name: 'weight',
+						name: 'full_weight',
 						type: 'decimal',
 						isNullable: false,
 					},
 					{
-						name: 'lux',
+						name: 'honey_weight',
 						type: 'decimal',
 						isNullable: false,
 					},
