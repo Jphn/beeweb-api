@@ -1,5 +1,6 @@
 import { EntitySchema } from 'typeorm';
 import { ApiaryProps } from '../../../app/entities/apiary';
+import { ApiaryDataEntityProps } from './apiary-data';
 import { HiveEntityProps } from './hive';
 import { UserEntityProps } from './user';
 
@@ -7,6 +8,7 @@ export type ApiaryEntityProps = {
 	id: string;
 	users: UserEntityProps[];
 	hives: HiveEntityProps[];
+	data: ApiaryDataEntityProps[];
 } & ApiaryProps;
 
 export const ApiaryEntity = new EntitySchema<ApiaryEntityProps>({
@@ -40,6 +42,12 @@ export const ApiaryEntity = new EntitySchema<ApiaryEntityProps>({
 		hives: {
 			type: 'one-to-many',
 			target: 'hive',
+			cascade: true,
+			inverseSide: 'apiary',
+		},
+		data: {
+			type: 'one-to-many',
+			target: 'apiaryData',
 			cascade: true,
 			inverseSide: 'apiary',
 		},
