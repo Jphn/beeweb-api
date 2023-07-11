@@ -1,15 +1,11 @@
 import { EntitySchema } from 'typeorm';
+import { HiveDataProps } from '../../../app/entities/hive-data';
 import { HiveEntityProps } from './hive';
 
-export interface HiveDataEntityProps {
+export type HiveDataEntityProps = {
 	id: string;
 	hive: HiveEntityProps;
-	temp: number;
-	humidity: number;
-	weight: number;
-	lux: number;
-	noise: number;
-}
+} & HiveDataProps;
 
 export const HiveDataEntity = new EntitySchema<HiveDataEntityProps>({
 	name: 'hiveData',
