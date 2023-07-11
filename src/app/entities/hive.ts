@@ -1,3 +1,5 @@
+import { CustomError } from '../errors/custom-error';
+import { Either, right } from '../errors/either';
 import { Entity } from './entity';
 
 export interface HiveProps {
@@ -9,7 +11,7 @@ export class Hive extends Entity<HiveProps> {
 		super(props, _id);
 	}
 
-	static create({ name }: HiveProps, _id?: string) {
-		return new Hive({ name }, _id);
+	static create({ name }: HiveProps, _id?: string): Either<CustomError, Hive> {
+		return right(new Hive({ name }, _id));
 	}
 }
