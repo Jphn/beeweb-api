@@ -15,6 +15,10 @@ export const HiveDataEntity = new EntitySchema<HiveDataEntityProps>({
 			type: 'uuid',
 			primary: true,
 		},
+    uniqueKey: {
+      type: 'macaddr',
+      unique: true
+    },
 		temp: {
 			type: 'decimal',
 			nullable: false,
